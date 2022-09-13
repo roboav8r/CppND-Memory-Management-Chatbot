@@ -41,6 +41,8 @@ ChatBot::~ChatBot()
         _image = NULL;
     }
 }
+// Note: Rule of five, implemented with guidance from https://knowledge.udacity.com/questions/310200
+// and https://www.geeksforgeeks.org/copy-constructor-vs-assignment-operator-in-c/
 
 // Copy constructor
 ChatBot::ChatBot(const ChatBot& source)
