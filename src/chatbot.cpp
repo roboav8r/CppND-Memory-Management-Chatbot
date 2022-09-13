@@ -44,26 +44,57 @@ ChatBot::~ChatBot()
 
 // Copy constructor
 ChatBot::ChatBot(const ChatBot& source)
+: _chatLogic{source._chatLogic}, _rootNode{source._rootNode}, _image{new wxBitmap{*(source._image)}}
 {
     std::cout << "ChatBot Copy Constructor" << std::endl;
 }
 
 // Move constructor
 ChatBot::ChatBot(ChatBot&& source)
+: _chatLogic{source._chatLogic}, _rootNode{source._rootNode}, _image{source._image}
 {
     std::cout << "ChatBot Move Constructor" << std::endl;
+    source._chatLogic = nullptr;
+    source._rootNode = nullptr;
+    // deallocate heap memory
+    if(source._image != NULL) // Attention: wxWidgets used NULL and not nullptr
+    {
+        delete source._image;
+        source._image = NULL;
+    }
 }
 
 // Copy assignment operator
 ChatBot& ChatBot::operator=(const ChatBot& source)
 {
     std::cout << "ChatBot Copy Assignment Operator" << std::endl;
+    
+    if ( &source != this){
+        _chatLogic = source._chatLogic;
+        _rootNode = source._rootNode;
+        _image = source._image;
+    }
+    return *this;
 }
 
-// // Move assignment operator
+// Move assignment operator
 ChatBot& ChatBot::operator=(ChatBot&& source)
 {
     std::cout << "ChatBot Move Assignment Operator" << std::endl;
+    if ( &source != this){
+        _chatLogic = source._chatLogic;
+        _rootNode = source._rootNode;
+        _image = source._image;
+        
+        source._chatLogic = nullptr;
+        source._rootNode = nullptr;
+        if(source._image != NULL) // Attention: wxWidgets used NULL and not nullptr
+        {
+            delete source._image;
+            source._image = NULL;
+        }
+    }
+    return *this;
 }
 
 void ChatBot::ReceiveMessageFromUser(std::string message)
