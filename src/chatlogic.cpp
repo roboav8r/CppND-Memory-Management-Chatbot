@@ -12,43 +12,16 @@
 #include "chatlogic.h"
 
 
-ChatLogic::ChatLogic()
-{
-    //// STUDENT CODE
-    ////
-
-    // create instance of chatbot
-    _chatBot = new ChatBot("../images/chatbot.png");
-
-    // add pointer to chatlogic so that chatbot answers can be passed on to the GUI
-    _chatBot->SetChatLogicHandle(this);
-
-    ////
-    //// EOF STUDENT CODE
-}
+ChatLogic::ChatLogic(){}
 
 ChatLogic::~ChatLogic()
 {
-    //// STUDENT CODE
-    ////
-
-    // delete chatbot instance
-    delete _chatBot;
-
     // delete all nodes
     for (auto it = std::begin(_nodes); it != std::end(_nodes); ++it)
     {
         (*it).reset();
     }
 
-    // delete all edges
-    for (auto it = std::begin(_edges); it != std::end(_edges); ++it)
-    {
-        (*it).reset();
-    }
-
-    ////
-    //// EOF STUDENT CODE
 }
 
 template <typename T>
@@ -140,8 +113,6 @@ void ChatLogic::LoadAnswerGraphFromFile(std::string filename)
                     // edge-based processing
                     if (type->second == "EDGE")
                     {
-                        //// STUDENT CODE
-                        ////
 
                         // find tokens for incoming (parent) and outgoing (child) node
                         auto parentToken = std::find_if(tokens.begin(), tokens.end(), [](const std::pair<std::string, std::string> &pair) { return pair.first == "PARENT"; });
@@ -157,18 +128,16 @@ void ChatLogic::LoadAnswerGraphFromFile(std::string filename)
                             std::unique_ptr<GraphEdge> edge = std::make_unique<GraphEdge>(id);
                             edge->SetChildNode((*childNode).get());
                             edge->SetParentNode((*parentNode).get());
-                            _edges.push_back(std::move(edge));
 
-                            // find all keywords for current node
+                            // find all keywords for current node, then move it
                             AddAllTokensToElement("KEYWORD", tokens, *edge);
+                            //_edges.push_back(edge.get());
 
                             // store reference in child node and parent node
                             (*childNode)->AddEdgeToParentNode(edge.get());
                             (*parentNode)->AddEdgeToChildNode(std::move(edge));
                         }
 
-                        ////
-                        //// EOF STUDENT CODE
                     }
                 }
                 else
@@ -186,9 +155,6 @@ void ChatLogic::LoadAnswerGraphFromFile(std::string filename)
         std::cout << "File could not be opened!" << std::endl;
         return;
     }
-
-    //// STUDENT CODE
-    ////
 
     // identify root node
     GraphNode *rootNode = nullptr;
@@ -209,12 +175,17 @@ void ChatLogic::LoadAnswerGraphFromFile(std::string filename)
         }
     }
 
+    // Create ChatBot instance on the stack
+    ChatBot myChatBot = ChatBot("../images/chatbot.png");
+    _chatBot = &myChatBot;
+
+    // add pointer to chatlogic so that chatbot answers can be passed on to the GUI
+    myChatBot.SetChatLogicHandle(this);
+
     // add chatbot to graph root node
-    _chatBot->SetRootNode(rootNode);
-    rootNode->MoveChatbotHere(_chatBot);
+    myChatBot.SetRootNode(rootNode);
+    rootNode->MoveChatbotHere(std::move(myChatBot));
     
-    ////
-    //// EOF STUDENT CODE
 }
 
 void ChatLogic::SetPanelDialogHandle(ChatBotPanelDialog *panelDialog)
